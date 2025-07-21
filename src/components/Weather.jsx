@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import './Weather.css';
 import search_icon from '../assets/search.png';
 import clear from '../assets/clear.png';
@@ -12,7 +12,7 @@ import humidity from '../assets/humidity.png';
 const Weather = () => {
   const inputRef = useRef();
 
-  const [weatherData, setWeatherData] = useState(false);
+  const [weatherData, setWeatherData] = useState(null);
 
   const allIcons = {
     "01d": clear,
@@ -37,21 +37,16 @@ const Weather = () => {
       return;
     }
     try {
-      console.log("Searching weather for city:", city);
       const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${import.meta.env.VITE_APP_ID}`;
-      console.log("Request URL:", url);
-
       const response = await fetch(url);
-      console.log("Response status:", response.status);
 
       if (!response.ok) {
-       alert("City not found");
-       return;
+        alert("City not found");
+        setWeatherData(null); // hide details if city not found
+        return;
       }
 
       const data = await response.json();
-      console.log("Data received:", data);
-
       const icon = allIcons[data.weather?.[0]?.icon] || clear;
 
       setWeatherData({
@@ -62,14 +57,10 @@ const Weather = () => {
         icon: icon
       });
     } catch (error) {
-      setWeatherData(false);
       console.error("Error fetching weather data:", error);
+      setWeatherData(null);
     }
   };
-
-  useEffect(() => {
-    search("New York");
-  }, []);
 
   return (
     <div className='weather'>
